@@ -11,5 +11,5 @@ I strongly every one use different account to commit to your group project. So t
 
 <b>ClosestPair</b>
 <pre>
-/home/hduser/Downloads/spark/bin/spark-submit --class edu.asu.cse512.ClosestPair --jars /home/hduser/Desktop/group15/jts-1.13.jar --master spark://master:7077  /home/hduser/Desktop/jarsss/closestPair-0.1.jar "hdfs://master:54310/content/closestpair.csv" "hdfs://master:54310/content/closestpairoutput"
+/home/hduser/Downloads/spark/bin/spark-submit --class edu.asu.cse512.ClosestPair --jars /home/hduser/Desktop/group15/jts-1.13.jar --master spark://192.168.1.100:7077  /home/hduser/Desktop/jarsss/closestPair-0.1.jar "hdfs://master:54310/content/closestpair.csv" "hdfs://master:54310/content/closestpairoutput"
 </pre>
