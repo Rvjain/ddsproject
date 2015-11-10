@@ -19,6 +19,8 @@ import com.vividsolutions.jts.algorithm.ConvexHull;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
+import org.apache.spark.api.java.function.Function;
+
 /**
  * Hello world!
  *
@@ -43,7 +45,14 @@ public class convexHull
 		JavaSparkContext context = new JavaSparkContext(sparkConf);
 		JavaRDD<String> masterConvexHull = getConvexHull(context, args[0]);
 		deleteIfExist(args[1]);
-		masterConvexHull.saveAsTextFile(args[1]);
+		masterConvexHull.sortBy( new Function<String,String>() {
+
+			public String call(String str) throws Exception {
+				// TODO Auto-generated method stub
+				return str;
+			}
+			}, true, 1 ).saveAsTextFile(args[1]);
+
     }
     public static void deleteIfExist(String key) {
 		URI uri = URI.create(key);
