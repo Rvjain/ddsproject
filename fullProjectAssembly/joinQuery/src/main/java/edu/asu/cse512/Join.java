@@ -1,9 +1,14 @@
 package edu.asu.cse512;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -128,7 +133,7 @@ public class Join
 	      });
 		
 		//reduce the function to get the output string
-		
+		 deleteIfExist(args[2]);
 		finalOutput.coalesce(1).sortBy( new Function<String,String>() {
 
 			public String call(String str) throws Exception {
@@ -137,6 +142,18 @@ public class Join
 			}
 			}, true, 1 ).saveAsTextFile(args[2]);
 		 
+	}
+    
+    public static void deleteIfExist(String key) {
+		URI uri = URI.create(key);
+		try {
+			FileSystem fs = FileSystem.get(uri, new Configuration());
+			if (fs.exists(new Path(uri)))
+				fs.delete(new Path(uri), true);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
     
