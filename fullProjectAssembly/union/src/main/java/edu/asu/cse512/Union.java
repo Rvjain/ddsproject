@@ -45,6 +45,13 @@ public class Union
 		JavaRDD<Polygon> MappedGeometries = MappedPolygons.mapPartitions(new PolygonUnion());
 		JavaRDD<Polygon> ReduceList = MappedGeometries.coalesce(1);
 		JavaRDD<Polygon> FinalList = ReduceList.mapPartitions(new PolygonUnion());
+		FinalList = FinalList.distinct().sortBy( new Function<Polygon,Polygon>() {
+
+			public Polygon call(Polygon str) throws Exception {
+				// TODO Auto-generated method stub
+				return str;
+			}
+			}, true, 1 );
 		JavaRDD<String> coordString = FinalList.mapPartitions(new PolygonSave());
 		deleteIfExist(args[1]);
 		coordString.distinct().sortBy( new Function<String,String>() {
