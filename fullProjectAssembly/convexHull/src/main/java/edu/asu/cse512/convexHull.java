@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,12 +16,11 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function;
 
 import com.vividsolutions.jts.algorithm.ConvexHull;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-
-import org.apache.spark.api.java.function.Function;
 
 /**
  * Hello world!
@@ -86,9 +87,16 @@ public class convexHull
 				}
 				ConvexHull convexhull = new ConvexHull(masterConvexHull.toArray(new Coordinate[masterConvexHull.size()]), new GeometryFactory());
 				Coordinate []arrayConvexHull = convexhull.getConvexHull().getCoordinates();
+				List<Coordinate> aa = Arrays.asList(arrayConvexHull);
+				Collections.sort(aa,new Comparator<Coordinate>() {
+
+					public int compare(Coordinate o1, Coordinate o2) {
+					    return Double.compare(o1.x, o2.x);
+					}
+					});
 				ArrayList<String> result = new ArrayList<String>();
-				for(int i=0;i<arrayConvexHull.length;i++){
-					String s = arrayConvexHull[i].x+", "+arrayConvexHull[i].y;
+				for(int i=0;i<aa.size();i++){
+					String s = aa.get(i).x+", "+aa.get(i).y;
 					result.add(s);
 				}
 				return result;
