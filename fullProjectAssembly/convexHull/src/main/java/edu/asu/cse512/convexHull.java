@@ -4,12 +4,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -18,11 +14,12 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.Function;
 
 import com.vividsolutions.jts.algorithm.ConvexHull;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+
+import org.apache.spark.api.java.function.Function;
 
 /**
  * Hello world!
@@ -46,9 +43,15 @@ public class convexHull
     	//And,Don't add a additional clean up step delete the new generated file...
     	SparkConf sparkConf = new SparkConf().setAppName("DDSProject");
 		JavaSparkContext context = new JavaSparkContext(sparkConf);
-		JavaRDD<String> masterConvexHull = getConvexHull(context, args[0]);
+		JavaRDD<Coordinate> masterConvexHull = getConvexHull(context, args[0]);
 		deleteIfExist(args[1]);
-		masterConvexHull.distinct().saveAsTextFile(args[1]);
+		masterConvexHull.distinct().sortBy( new Function<Coordinate,Coordinate>() {
+
+			public Coordinate call(Coordinate str) throws Exception {
+				// TODO Auto-generated method stub
+				return str;
+			}
+			}, true, 1 ).saveAsTextFile(args[1]);
 
     }
     public static void deleteIfExist(String key) {
@@ -62,20 +65,20 @@ public class convexHull
 			e.printStackTrace();
 		}
 	}
-    public static JavaRDD<String> getConvexHull(JavaSparkContext context, String filePath) {
+    public static JavaRDD<Coordinate> getConvexHull(JavaSparkContext context, String filePath) {
 		JavaRDD<String> points = context.textFile(filePath);
 		JavaRDD<Coordinate> workerConvexHull = getWorkerHull(points);
 		workerConvexHull = workerConvexHull.coalesce(1);
-		JavaRDD<String> masterConvexHull = getMasterHull(workerConvexHull);
+		JavaRDD<Coordinate> masterConvexHull = getMasterHull(workerConvexHull);
 		return masterConvexHull;
 	}
 	
-	public static JavaRDD<String> getMasterHull(JavaRDD<Coordinate> workerConvexHull) {
-		JavaRDD<String> masterHull = workerConvexHull.mapPartitions(new FlatMapFunction<Iterator<Coordinate>, String>() {
+	public static JavaRDD<Coordinate> getMasterHull(JavaRDD<Coordinate> workerConvexHull) {
+		JavaRDD<Coordinate> masterHull = workerConvexHull.mapPartitions(new FlatMapFunction<Iterator<Coordinate>, Coordinate>() {
 
 			private static final long serialVersionUID = 1L;
 
-			public Iterable<String> call(Iterator<Coordinate> coordinate) throws Exception {
+			public Iterable<Coordinate> call(Iterator<Coordinate> coordinate) throws Exception {
 				List<Coordinate> masterConvexHull = new ArrayList<Coordinate>();
 				while(coordinate.hasNext()){
 					Coordinate c =coordinate.next();
@@ -83,20 +86,12 @@ public class convexHull
 				}
 				ConvexHull convexhull = new ConvexHull(masterConvexHull.toArray(new Coordinate[masterConvexHull.size()]), new GeometryFactory());
 				Coordinate []arrayConvexHull = convexhull.getConvexHull().getCoordinates();
-				SortedSet<Coordinate> aa = new TreeSet<Coordinate>(Arrays.asList(arrayConvexHull));
-//				List<Coordinate> aa = Arrays.asList(arrayConvexHull);
-//				Collections.sort(aa,new Comparator<Coordinate>() {
-//
-//					public int compare(Coordinate o1, Coordinate o2) {
-//					    return Double.compare(o1.x, o2.x);
-//					}
-//					});
-				ArrayList<String> result = new ArrayList<String>();
-				for(Coordinate c:aa){
-					String s = c.x+", "+c.y;
-					result.add(s);
-				}
-				return result;
+				//ArrayList<String> result = new ArrayList<String>();
+//				for(int i=0;i<arrayConvexHull.length;i++){
+//					String s = arrayConvexHull[i].x+", "+arrayConvexHull[i].y;
+//					result.add(s);
+//				}
+				return Arrays.asList(arrayConvexHull);
 			}
 		});
 		return masterHull;
