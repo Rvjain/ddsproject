@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,17 +46,17 @@ public class Union
 		JavaRDD<Polygon> MappedGeometries = MappedPolygons.mapPartitions(new PolygonUnion());
 		JavaRDD<Polygon> ReduceList = MappedGeometries.coalesce(1);
 		JavaRDD<Polygon> FinalList = ReduceList.mapPartitions(new PolygonUnion());
-		FinalList = FinalList.distinct().sortBy( new Function<Polygon,Polygon>() {
+		
+		JavaRDD<Coordinate> coords =  FinalList.mapPartitions(new PolyToCoord());
+		deleteIfExist(args[1]);
+		coords.distinct().sortBy( new Function<Coordinate,Coordinate>() {
 
-			public Polygon call(Polygon str) throws Exception {
+			public Coordinate call(Coordinate str) throws Exception {
 				// TODO Auto-generated method stub
 				return str;
 			}
-			}, true, 1 );
-		JavaRDD<String> coordString = FinalList.mapPartitions(new PolygonSave());
-		deleteIfExist(args[1]);
-		coordString.saveAsTextFile(args[1]);
-
+			}, true, 1 ).mapPartitions(new CoordinateSave()).saveAsTextFile(args[1]);;
+		
     }
     
     public static void deleteIfExist(String key) {
@@ -119,24 +120,31 @@ public Iterable<Polygon> call(Iterator<Polygon> geos) throws Exception {
 	return finalPolygon;
 }
 }
+class PolyToCoord implements FlatMapFunction<Iterator<Polygon>, Coordinate>, Serializable{
+	private static final long serialVersionUID = 1L;
 
-class PolygonSave implements FlatMapFunction<Iterator<Polygon>, String>, Serializable{
-/**
- * 
- */
-private static final long serialVersionUID = 1L;
-
-public Iterable<String> call(Iterator<Polygon> polygons) throws Exception {
-	List<String> coords = new ArrayList<String>();
-	while(polygons.hasNext()){
-		Polygon currPolygon = polygons.next();
-		Coordinate[] coordinates = currPolygon.getCoordinates();
-		for (Coordinate coord: coordinates){
+	public Iterable<Coordinate> call(Iterator<Polygon> polygons) throws Exception {
+		List<Coordinate> coords = new ArrayList<Coordinate>();
+		while(polygons.hasNext()){
+			Polygon currPolygon = polygons.next();
+			Coordinate[] coordinates = currPolygon.getCoordinates();
+			coords.addAll(Arrays.asList(coordinates));
+//			for (Coordinate coord: coordinates){
+//				String coordString = coord.x + "," + coord.y;
+//				coords.add(coordString);
+//			}
+		}
+		return coords;
+	}
+}
+class CoordinateSave implements FlatMapFunction<Iterator<Coordinate>, String>, Serializable{
+	public Iterable<String> call(Iterator<Coordinate> coordinates) throws Exception {
+		List<String> coords = new ArrayList<String>();
+		while(coordinates.hasNext()){
+			Coordinate coord = coordinates.next();
 			String coordString = coord.x + "," + coord.y;
 			coords.add(coordString);
 		}
+		return coords;
 	}
-	return coords;
-}
-
 }
