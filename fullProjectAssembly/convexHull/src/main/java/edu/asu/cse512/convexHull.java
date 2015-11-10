@@ -1,6 +1,7 @@
 package edu.asu.cse512;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,9 +52,13 @@ public class convexHull
 				// TODO Auto-generated method stub
 				return str;
 			}
-			}, true, 1 ).saveAsTextFile(args[1]);
+			}, true, 1 ).mapPartitions(new CoordinateSave()).saveAsTextFile(args[1]);
+		
 
     }
+    
+    
+    
     public static void deleteIfExist(String key) {
 		URI uri = URI.create(key);
 		try {
@@ -86,11 +91,6 @@ public class convexHull
 				}
 				ConvexHull convexhull = new ConvexHull(masterConvexHull.toArray(new Coordinate[masterConvexHull.size()]), new GeometryFactory());
 				Coordinate []arrayConvexHull = convexhull.getConvexHull().getCoordinates();
-				//ArrayList<String> result = new ArrayList<String>();
-//				for(int i=0;i<arrayConvexHull.length;i++){
-//					String s = arrayConvexHull[i].x+", "+arrayConvexHull[i].y;
-//					result.add(s);
-//				}
 				return Arrays.asList(arrayConvexHull);
 			}
 		});
@@ -122,4 +122,16 @@ public class convexHull
 		return workerConvexHull;
 	}
 
+}
+
+class CoordinateSave implements FlatMapFunction<Iterator<Coordinate>, String>, Serializable{
+	public Iterable<String> call(Iterator<Coordinate> coordinates) throws Exception {
+		List<String> coords = new ArrayList<String>();
+		while(coordinates.hasNext()){
+			Coordinate coord = coordinates.next();
+			String coordString = coord.x + "," + coord.y;
+			coords.add(coordString);
+		}
+		return coords;
+	}
 }
