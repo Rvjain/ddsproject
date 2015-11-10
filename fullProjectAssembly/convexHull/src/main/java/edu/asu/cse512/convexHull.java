@@ -46,13 +46,7 @@ public class convexHull
 		JavaSparkContext context = new JavaSparkContext(sparkConf);
 		JavaRDD<String> masterConvexHull = getConvexHull(context, args[0]);
 		deleteIfExist(args[1]);
-		masterConvexHull.distinct().sortBy( new Function<String,String>() {
-
-			public String call(String str) throws Exception {
-				// TODO Auto-generated method stub
-				return str;
-			}
-			}, true, 1 ).saveAsTextFile(args[1]);
+		masterConvexHull.distinct().saveAsTextFile(args[1]);
 
     }
     public static void deleteIfExist(String key) {
