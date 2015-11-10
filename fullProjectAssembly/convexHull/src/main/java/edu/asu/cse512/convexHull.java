@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -81,16 +83,17 @@ public class convexHull
 				}
 				ConvexHull convexhull = new ConvexHull(masterConvexHull.toArray(new Coordinate[masterConvexHull.size()]), new GeometryFactory());
 				Coordinate []arrayConvexHull = convexhull.getConvexHull().getCoordinates();
-				List<Coordinate> aa = Arrays.asList(arrayConvexHull);
-				Collections.sort(aa,new Comparator<Coordinate>() {
-
-					public int compare(Coordinate o1, Coordinate o2) {
-					    return Double.compare(o1.x, o2.x);
-					}
-					});
+				SortedSet<Coordinate> aa = new TreeSet<Coordinate>(Arrays.asList(arrayConvexHull));
+//				List<Coordinate> aa = Arrays.asList(arrayConvexHull);
+//				Collections.sort(aa,new Comparator<Coordinate>() {
+//
+//					public int compare(Coordinate o1, Coordinate o2) {
+//					    return Double.compare(o1.x, o2.x);
+//					}
+//					});
 				ArrayList<String> result = new ArrayList<String>();
-				for(int i=0;i<aa.size();i++){
-					String s = aa.get(i).x+", "+aa.get(i).y;
+				for(Coordinate c:aa){
+					String s = c.x+", "+c.y;
 					result.add(s);
 				}
 				return result;
