@@ -179,15 +179,33 @@ public class Join
 		//if input supplied is rectangle
 		if(inputVect.size()==5)
 		{   
+			double iX1=inputVect.elementAt(1);
+			double iY1=inputVect.elementAt(2);
+			double iX2=inputVect.elementAt(3);
+			double iY2=inputVect.elementAt(4);
+			
 			double iXmin=Math.min(inputVect.elementAt(1),inputVect.elementAt(3));
 			double iXmax=Math.max(inputVect.elementAt(1),inputVect.elementAt(3));
 			double iYmin=Math.min(inputVect.elementAt(2),inputVect.elementAt(4));
 			double iYmax=Math.max(inputVect.elementAt(2),inputVect.elementAt(4));
-      	
-			if((sXmin<=iXmin)&&(sXmax>=iXmax)&&(sYmin<=iYmin)&&(sYmax>=iYmax))
+        	
+			if(((sXmin<=iX1&&sXmax>=iX1)||(sXmin<=iX2&&sXmax>=iX2))&&((sYmin<=iY1&&sYmax>=iY1)||(sYmin<=iY2&&sYmax>=iY2)))
 			{	
 				return true;
-			}	
+			}
+			else if(((sXmin<=iX1&&sXmax>=iX1)||(sXmin<=iX2&&sXmax>=iX2))&&((iYmax-iYmin)>=(sYmax-sYmin)))
+			{
+				return true;
+			}
+			else if(((sYmin<=iY1&&sYmax>=iY1)||(sYmin<=iY2&&sYmax>=iY2))&&((iXmax-iXmin)>=(sXmax-sXmin)))
+			{
+				return true;
+			}
+			if((iXmin<=sXmin)&&(iXmax>=sXmax)&&(iYmin<=sYmin)&&(iYmax>=sYmax))
+			{	
+				return true;
+			}
+			
 		}
 
 		return false;
