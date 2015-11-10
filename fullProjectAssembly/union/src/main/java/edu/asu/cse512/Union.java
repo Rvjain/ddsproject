@@ -15,6 +15,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -46,7 +47,14 @@ public class Union
 		JavaRDD<Polygon> FinalList = ReduceList.mapPartitions(new PolygonUnion());
 		JavaRDD<String> coordString = FinalList.mapPartitions(new PolygonSave());
 		deleteIfExist(args[1]);
-		coordString.saveAsTextFile(args[1]);
+		coordString.distinct().sortBy( new Function<String,String>() {
+
+			public String call(String str) throws Exception {
+				// TODO Auto-generated method stub
+				return str;
+			}
+			}, true, 1 ).saveAsTextFile(args[1]);
+
     }
     
     public static void deleteIfExist(String key) {

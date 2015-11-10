@@ -16,6 +16,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -25,7 +26,14 @@ public class ClosestPair {
 		JavaSparkContext context = new JavaSparkContext(sparkConf);
 		JavaRDD<String> closestPair = getClosestPair(context, args[0]);
 		deleteIfExist(args[1]);
-		closestPair.saveAsTextFile(args[1]);
+		closestPair.sortBy( new Function<String,String>() {
+
+			public String call(String str) throws Exception {
+				// TODO Auto-generated method stub
+				return str;
+			}
+			}, true, 1 ).saveAsTextFile(args[1]);
+
 	}
 
 	public static void deleteIfExist(String key) {

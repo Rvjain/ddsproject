@@ -15,6 +15,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function;
 
 import com.vividsolutions.jts.algorithm.ConvexHull;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -40,7 +41,14 @@ public class FarthestPair
 		JavaRDD<Coordinate> farthestPoints = lines.mapPartitions(new globalFarthest());
         JavaRDD<String> coordsString = farthestPoints.mapPartitions(new CoordinateSave());
 		deleteIfExist(args[1]);
-		coordsString.saveAsTextFile(args[1]);
+		coordsString.sortBy( new Function<String,String>() {
+
+			public String call(String str) throws Exception {
+				// TODO Auto-generated method stub
+				return str;
+			}
+			}, true, 1 ).saveAsTextFile(args[1]);
+
 		context.close();
         
     }
