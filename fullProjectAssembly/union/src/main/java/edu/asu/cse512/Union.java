@@ -54,13 +54,7 @@ public class Union
 			}, true, 1 );
 		JavaRDD<String> coordString = FinalList.mapPartitions(new PolygonSave());
 		deleteIfExist(args[1]);
-		coordString.distinct().sortBy( new Function<String,String>() {
-
-			public String call(String str) throws Exception {
-				// TODO Auto-generated method stub
-				return str;
-			}
-			}, true, 1 ).saveAsTextFile(args[1]);
+		coordString.saveAsTextFile(args[1]);
 
     }
     
